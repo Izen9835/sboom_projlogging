@@ -1,0 +1,25 @@
+name: sboom_projlogging
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  appwrite: ^17.0.2
+  flutter:
+    sdk: flutter
+  flutter_quill: ^11.4.2
+  flutter_quill_extensions: ^11.0.0
+  flutter_riverpod: ^2.6.1
+  fpdart: ^1.1.1
+  http: ^1.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
