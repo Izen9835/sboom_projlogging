@@ -3,6 +3,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sboom_projlogging/features/auth/view/login_screen.dart';
 import 'package:sboom_projlogging/features/home/view/home_view.dart';
+import 'package:sboom_projlogging/features/settings/view/settings_view.dart';
 
 void main() {
   runApp(ProviderScope(child: const MainApp()));
@@ -19,6 +20,7 @@ class MainApp extends ConsumerWidget {
       routes: {
         '/': (context) => LoginScreen(),
         'home': (context) => HomeView(),
+        'settings': (context) => SettingsView(),
       },
     );
   }

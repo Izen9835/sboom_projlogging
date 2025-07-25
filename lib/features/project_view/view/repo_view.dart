@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sboom_projlogging/core/utils.dart';
-import 'package:sboom_projlogging/features/repo_detail/widgets/EditorPopup.dart';
-import 'package:sboom_projlogging/model/repo_model.dart';
+import 'package:sboom_projlogging/features/project_view/widgets/EditorPopup.dart';
+import 'package:sboom_projlogging/model/project_model.dart';
 
 class RepoDetailView extends ConsumerWidget {
-  final Repo repo;
+  final Project repo;
 
   const RepoDetailView({Key? key, required this.repo}) : super(key: key);
 
   // Route function for navigation
-  static MaterialPageRoute route({required Repo repo}) {
+  static MaterialPageRoute route({required Project repo}) {
     return MaterialPageRoute(builder: (_) => RepoDetailView(repo: repo));
   }
 
@@ -44,8 +44,6 @@ class RepoDetailView extends ConsumerWidget {
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
-            Text(repo.language ?? 'Unknown'),
-            const Spacer(),
             // Button to open the editor popup
             Center(
               child: ElevatedButton.icon(

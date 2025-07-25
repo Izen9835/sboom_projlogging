@@ -13,10 +13,6 @@ final authAPIProvider = Provider((ref) {
   return AuthAPI(account: account);
 });
 
-final repoListProvider = FutureProvider<List<dynamic>>(
-  (ref) => ref.watch(authAPIProvider).getGitHubPublicRepos(),
-);
-
 abstract class IAuthAPI {
   FutureEither<model.Session> login({
     required String email,
@@ -68,65 +64,5 @@ class AuthAPI implements IAuthAPI {
   }) {
     // TODO: implement login
     throw UnimplementedError();
-  }
-
-  Future<List<dynamic>> getGitHubPublicRepos() async {
-    // Get the current session
-    final session = await _account.getSession(sessionId: 'current');
-    final accessToken = session.providerAccessToken;
-
-    // if (accessToken == null) {
-    //   throw Exception('GitHub access token not available.');
-    // }
-
-    // // Make request to GitHub API
-    // final url = Uri.parse(
-    //   'https://api.github.com/user/repos?visibility=public',
-    // );
-    // final response = await http.get(
-    //   url,
-    //   headers: {
-    //     'Authorization': 'Bearer $accessToken',
-    //     'Accept': 'application/vnd.github+json',
-    //   },
-    // );
-
-    // if (response.statusCode == 200) {
-    //   return jsonDecode(response.body);
-    // } else {
-    //   throw Exception(
-    //     'GitHub request failed with status: ${response.statusCode}, ${response.body}',
-    //   );
-    // }
-
-    // Step 1: Get the username of the authenticated user.
-    final userResponse = await http.get(
-      Uri.parse('https://api.github.com/user'),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Accept': 'application/vnd.github+json',
-      },
-    );
-
-    if (userResponse.statusCode != 200) {
-      throw Exception('GitHub user request failed...');
-    }
-
-    final username = jsonDecode(userResponse.body)['login'];
-
-    // Step 2: Fetch only that user's own public repos.
-    final reposResponse = await http.get(
-      Uri.parse('https://api.github.com/users/$username/repos?type=public'),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Accept': 'application/vnd.github+json',
-      },
-    );
-
-    if (reposResponse.statusCode == 200) {
-      return jsonDecode(reposResponse.body);
-    } else {
-      throw Exception('GitHub repos request failed...');
-    }
   }
 }

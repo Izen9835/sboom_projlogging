@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sboom_projlogging/common/common.dart';
 import 'package:sboom_projlogging/features/home/controller/github_viewcontroller.dart';
-import 'package:sboom_projlogging/features/repo_detail/view/repo_view.dart';
+import 'package:sboom_projlogging/features/project_view/view/repo_view.dart';
 
 class HomeView extends ConsumerWidget {
   static route() => MaterialPageRoute(builder: (context) => HomeView());
@@ -17,33 +17,40 @@ class HomeView extends ConsumerWidget {
           "Your Projects",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-      ),
-      body: ref
-          .watch(reposListProvider)
-          .when(
-            data:
-                (repos) => ListView.builder(
-                  itemCount: repos.length,
-                  itemBuilder: (context, index) {
-                    final repo = repos[index];
-
-                    print('number of repos: ${repos.length}');
-
-                    return ListTile(
-                      title: Text(repo.name),
-                      subtitle: Text(repo.description ?? 'No description'),
-                      trailing: Text(repo.language ?? 'Unknown'),
-                      onTap: () {
-                        Navigator.of(
-                          context,
-                        ).push(RepoDetailView.route(repo: repo));
-                      },
-                    );
-                  },
-                ),
-            error: (error, st) => ErrorText(error: error.toString()),
-            loading: () => const Loader(),
+        actions: [
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(context, 'settings');
+            },
+            label: Icon(Icons.settings),
           ),
+        ],
+      ),
+      //   body: ref
+      //       .watch(reposListProvider)
+      //       .when(
+      //         data:
+      //             (repos) => ListView.builder(
+      //               itemCount: repos.length,
+      //               itemBuilder: (context, index) {
+      //                 final repo = repos[index];
+
+      //                 print('number of repos: ${repos.length}');
+
+      //                 return ListTile(
+      //                   title: Text(repo.name),
+      //                   subtitle: Text(repo.description ?? 'No description'),
+      //                   onTap: () {
+      //                     Navigator.of(
+      //                       context,
+      //                     ).push(RepoDetailView.route(repo: repo));
+      //                   },
+      //                 );
+      //               },
+      //             ),
+      //         error: (error, st) => ErrorText(error: error.toString()),
+      //         loading: () => const Loader(),
+      //       ),
     );
   }
 }
