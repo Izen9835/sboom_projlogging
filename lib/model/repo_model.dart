@@ -6,15 +6,15 @@ class Repo {
   final String html_url;
   final String? description;
   final String? language;
-  final bool fork;
+  final String repoID;
 
   Repo({
     required this.name,
     required this.full_name,
     required this.html_url,
-    this.description,
-    this.language,
-    required this.fork,
+    required this.description,
+    required this.language,
+    required this.repoID,
   });
 
   Repo copyWith({
@@ -23,7 +23,7 @@ class Repo {
     String? html_url,
     String? description,
     String? language,
-    bool? fork,
+    String? repoID,
   }) {
     return Repo(
       name: name ?? this.name,
@@ -31,7 +31,7 @@ class Repo {
       html_url: html_url ?? this.html_url,
       description: description ?? this.description,
       language: language ?? this.language,
-      fork: fork ?? this.fork,
+      repoID: repoID ?? this.repoID,
     );
   }
 
@@ -47,7 +47,7 @@ class Repo {
     if (language != null) {
       result.addAll({'language': language});
     }
-    result.addAll({'fork': fork});
+    result.addAll({'repoID': repoID});
 
     return result;
   }
@@ -59,7 +59,7 @@ class Repo {
       html_url: map['html_url'] ?? '',
       description: map['description'],
       language: map['language'],
-      fork: map['fork'] ?? false,
+      repoID: map['repoID'] ?? '',
     );
   }
 
@@ -69,7 +69,7 @@ class Repo {
 
   @override
   String toString() {
-    return 'Repo(name: $name, full_name: $full_name, html_url: $html_url, description: $description, language: $language, fork: $fork)';
+    return 'Repo(name: $name, full_name: $full_name, html_url: $html_url, description: $description, language: $language, repoID: $repoID)';
   }
 
   @override
@@ -82,7 +82,7 @@ class Repo {
         other.html_url == html_url &&
         other.description == description &&
         other.language == language &&
-        other.fork == fork;
+        other.repoID == repoID;
   }
 
   @override
@@ -92,6 +92,6 @@ class Repo {
         html_url.hashCode ^
         description.hashCode ^
         language.hashCode ^
-        fork.hashCode;
+        repoID.hashCode;
   }
 }

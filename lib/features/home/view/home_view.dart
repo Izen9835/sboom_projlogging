@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sboom_projlogging/common/common.dart';
-import 'package:sboom_projlogging/features/home/controller/github_viewcontroller.dart';
+import 'package:sboom_projlogging/features/home/controller/repoList_controller.dart';
 import 'package:sboom_projlogging/features/repo_detail/view/repo_view.dart';
 
 class HomeView extends ConsumerWidget {
@@ -17,6 +17,15 @@ class HomeView extends ConsumerWidget {
           "Your Projects",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        actions: [
+          ElevatedButton(
+            onPressed:
+                () => ref
+                    .read(gitHubControlProvider.notifier)
+                    .saveReposToDB(ref.read(reposListProvider).value!, context),
+            child: Text("upload"),
+          ),
+        ],
       ),
       body: ref
           .watch(reposListProvider)

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sboom_projlogging/common/common.dart';
 import 'package:sboom_projlogging/core/utils.dart';
+import 'package:sboom_projlogging/features/repo_detail/controller/repo_controller.dart';
 import 'package:sboom_projlogging/features/repo_detail/widgets/EditorPopup.dart';
 import 'package:sboom_projlogging/model/repo_model.dart';
 
@@ -45,6 +47,37 @@ class RepoDetailView extends ConsumerWidget {
             ),
             const SizedBox(height: 4),
             Text(repo.language ?? 'Unknown'),
+            const SizedBox(height: 30),
+            Expanded(
+              child: ref
+                  .watch(changeLogsListProvider(repo))
+                  .when(
+                    data: (clogs) {
+                      if (clogs.isEmpty) {
+                        return Center(child: Text('No changelogs found'));
+                      }
+                      print('Number of changelogs: ${clogs.length}');
+                      return ListView.builder(
+                        itemCount: clogs.length,
+                        itemBuilder: (context, index) {
+                          final clog = clogs[index];
+                          return ListTile(
+                            title: Text(clog.title ?? 'No title'),
+                            subtitle: Text(clog.text ?? ''),
+                            trailing: Text(clog.createdBy ?? ''),
+                            onTap: () {
+                              Navigator.of(
+                                context,
+                              ).push(RepoDetailView.route(repo: repo));
+                            },
+                          );
+                        },
+                      );
+                    },
+                    loading: () => const Loader(),
+                    error: (e, st) => ErrorText(error: e.toString()),
+                  ),
+            ),
             const Spacer(),
             // Button to open the editor popup
             Center(
