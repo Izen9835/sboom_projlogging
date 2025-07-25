@@ -7,21 +7,22 @@ import 'package:sboom_projlogging/model/model.dart';
 
 //TODO: convert to generics based on models in model.dart
 
-final dbAPIProvider = Provider((ref) {
-  return dbAPI(db: ref.watch(appwriteDatabaseProvider));
+final DbAPIProvider = Provider((ref) {
+  return DbAPI(db: ref.watch(appwriteDatabaseProvider));
 });
 
 abstract class IdbAPI {
-  FutureEitherVoid createListModel(List<dynamic>? list);
-  FutureEither<List<Project>> getListProject();
+  FutureEitherVoid createList(List<dynamic>? list);
+  Future<List<Project>> getListProjects();
+  Future<List<T>> getProjectDetails<T>(String projectID);
 }
 
-class dbAPI implements IdbAPI {
+class DbAPI implements IdbAPI {
   final Databases _db;
-  dbAPI({required Databases db}) : _db = db, super();
+  DbAPI({required Databases db}) : _db = db, super();
 
   @override
-  FutureEitherVoid createListModel(List<dynamic>? list) async {
+  FutureEitherVoid createList(List<dynamic>? list) async {
     final Map<String, Failure> failures = {};
 
     if (list == null || list.isEmpty) {
@@ -59,7 +60,7 @@ class dbAPI implements IdbAPI {
         // Query Appwrite DB for existing documents matching all these fields
         final existingDocs = await _db.listDocuments(
           databaseId: AppwriteConstants.databaseId,
-          collectionId: AppwriteConstants.repoCollection,
+          collectionId: AppwriteConstants.projectCollection,
           queries: queries,
         );
 
@@ -73,7 +74,9 @@ class dbAPI implements IdbAPI {
         // No duplicates found, proceed to create the document
         await _db.createDocument(
           databaseId: AppwriteConstants.databaseId,
-          collectionId: AppwriteConstants.repoCollection,
+          collectionId:
+              AppwriteConstants
+                  .projectCollection, //TODO: needs to change based on the model used
           documentId: projectID,
           data: dataMap,
         );
@@ -117,8 +120,20 @@ class dbAPI implements IdbAPI {
   }
 
   @override
-  FutureEither<List<Project>> getListProject() {
-    // TODO: implement getListProject
+  Future<List<Project>> getListProjects() async {
+    final list = await _db.listDocuments(
+      collectionId: AppwriteConstants.projectCollection,
+      databaseId: AppwriteConstants.databaseId,
+    );
+
+    return list.documents
+        .map((changelog) => Project.fromMap(changelog.data))
+        .toList();
+  }
+
+  @override
+  Future<List<T>> getProjectDetails<T>(String projectID) {
+    // TODO: implement getProjectDetails
     throw UnimplementedError();
   }
 }

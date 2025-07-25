@@ -9,7 +9,7 @@ import 'package:sboom_projlogging/model/project_model.dart';
 final GithubAccessProvider = StateNotifierProvider<GithubAccess, bool>((ref) {
   return GithubAccess(
     githubAPI: ref.watch(GithubAPIProvider),
-    dbAPI: ref.watch(dbAPIProvider),
+    dbAPI: ref.watch(DbAPIProvider),
   );
 });
 
@@ -20,8 +20,8 @@ final repoListProvider = FutureProvider((ref) async {
 
 class GithubAccess extends StateNotifier<bool> {
   final GithubAPI _githubAPI;
-  final dbAPI _dbAPI;
-  GithubAccess({required GithubAPI githubAPI, required dbAPI dbAPI})
+  final DbAPI _dbAPI;
+  GithubAccess({required GithubAPI githubAPI, required DbAPI dbAPI})
     : _githubAPI = githubAPI,
       _dbAPI = dbAPI,
       super(false);
@@ -48,7 +48,7 @@ class GithubAccess extends StateNotifier<bool> {
   }
 
   void trxToDB(List<Project>? projectsList, BuildContext context) async {
-    final res = await _dbAPI.createListModel(projectsList);
+    final res = await _dbAPI.createList(projectsList);
     res.fold(
       (l) => showSnackBar(context, l.message),
       (r) => showSnackBar(context, "success trx to db"),
