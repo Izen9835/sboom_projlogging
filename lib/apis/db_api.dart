@@ -12,9 +12,15 @@ final DbAPIProvider = Provider((ref) {
 });
 
 abstract class IdbAPI {
-  FutureEitherVoid createList(List<dynamic>? list);
+  FutureEitherVoid createBatchProject(List<Project>? list);
+  FutureEitherVoid createProjectDetail(
+    String projectID,
+    Map<String, dynamic> data,
+    DataType dataType,
+    bool stayUnique,
+  );
   Future<List<Project>> getListProjects();
-  Future<List<T>> getProjectDetails<T>(String projectID);
+  Future<List<T>> getProjectDetails<T>(String projectID, DataType dataType);
 }
 
 class DbAPI implements IdbAPI {
@@ -22,7 +28,7 @@ class DbAPI implements IdbAPI {
   DbAPI({required Databases db}) : _db = db, super();
 
   @override
-  FutureEitherVoid createList(List<dynamic>? list) async {
+  FutureEitherVoid createBatchProject(List<Project>? list) async {
     final Map<String, Failure> failures = {};
 
     if (list == null || list.isEmpty) {
@@ -34,18 +40,19 @@ class DbAPI implements IdbAPI {
       );
     }
 
-    for (final obj in list) {
+    for (final project in list) {
       try {
-        final projectID = (obj as dynamic).projectID as String?;
-        final dataMap = (obj as dynamic).toMap() as Map<String, dynamic>;
+        final projectID = project.projectID;
 
         if (projectID == null || projectID.isEmpty) {
           throw ArgumentError.value(
             projectID,
             'projectID',
-            'Must not be null or empty for processing object of type: ${obj.runtimeType}',
+            'Must not be null or empty for processing object of type: Project',
           );
         }
+
+        final dataMap = project.toMap();
 
         // Build comparison map excluding 'projectID'
         final comparisonMap = Map<String, dynamic>.from(dataMap)
@@ -75,34 +82,25 @@ class DbAPI implements IdbAPI {
         await _db.createDocument(
           databaseId: AppwriteConstants.databaseId,
           collectionId:
-              AppwriteConstants
-                  .projectCollection, //TODO: needs to change based on the model used
+              AppwriteConstants.projectCollection, // TODO: adjust if needed
           documentId: projectID,
           data: dataMap,
         );
       } on AppwriteException catch (e, st) {
-        print('Failed ${obj.runtimeType}: ${e.message}');
-        failures[obj.projectID ?? 'unknown'] = Failure(
+        print('Failed Project: ${e.message}');
+        failures[project.projectID ?? 'unknown'] = Failure(
           e.message ?? 'Error saving item',
           st,
         );
       } on ArgumentError catch (e, st) {
-        print('Validation failed for ${obj.runtimeType}: ${e.message}');
-        failures[obj.projectID ?? 'unknown'] = Failure(
+        print('Validation failed for Project: ${e.message}');
+        failures[project.projectID ?? 'unknown'] = Failure(
           e.message ?? 'Invalid data',
           st,
         );
-      } on NoSuchMethodError catch (e, st) {
-        print(
-          'Failed ${obj.runtimeType}: Missing required method or property - $e',
-        );
-        failures['unknown'] = Failure(
-          'Missing projectID or toMap method on object',
-          st,
-        );
       } catch (e, st) {
-        print('Failed ${obj.runtimeType}: ${e.toString()}');
-        failures[obj.projectID ?? 'unknown'] = Failure(e.toString(), st);
+        print('Failed Project: ${e.toString()}');
+        failures[project.projectID ?? 'unknown'] = Failure(e.toString(), st);
       }
     }
 
@@ -120,6 +118,48 @@ class DbAPI implements IdbAPI {
   }
 
   @override
+  FutureEitherVoid createProjectDetail(
+    String projectID,
+    Map<String, dynamic> data,
+    DataType dataType,
+    bool stayUnique,
+  ) async {
+    final collectionId = dataType.collectionId;
+
+    try {
+      if (stayUnique) {
+        final existingDocs = await _db.listDocuments(
+          databaseId: AppwriteConstants.databaseId,
+          collectionId: collectionId,
+          queries: [Query.equal('projectID', projectID)],
+        );
+
+        if (existingDocs.documents.isNotEmpty) {
+          return left(
+            Failure(
+              'Document with projectID $projectID already exists in $collectionId',
+              StackTrace.fromString(''),
+            ),
+          );
+        }
+      }
+
+      final document = await _db.createDocument(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: collectionId,
+        documentId: ID.unique(), // unique document ID as required
+        data: data,
+      );
+
+      return right(document);
+    } on AppwriteException catch (e, st) {
+      return left(Failure(e.message ?? 'Some unexpected error occurred', st));
+    } catch (e, st) {
+      return left(Failure(e.toString(), st));
+    }
+  }
+
+  @override
   Future<List<Project>> getListProjects() async {
     final list = await _db.listDocuments(
       collectionId: AppwriteConstants.projectCollection,
@@ -127,13 +167,23 @@ class DbAPI implements IdbAPI {
     );
 
     return list.documents
-        .map((changelog) => Project.fromMap(changelog.data))
+        .map((project) => Project.fromMap(project.data))
         .toList();
   }
 
   @override
-  Future<List<T>> getProjectDetails<T>(String projectID) {
-    // TODO: implement getProjectDetails
-    throw UnimplementedError();
+  Future<List<T>> getProjectDetails<T>(
+    String projectID,
+    DataType dataType,
+  ) async {
+    final collectionId = dataType.collectionId;
+
+    final documents = await _db.listDocuments(
+      databaseId: AppwriteConstants.databaseId,
+      collectionId: collectionId,
+      queries: [Query.equal('projectID', projectID)],
+    );
+
+    return documents.documents.map((doc) => fromDocument<T>(doc)).toList();
   }
 }

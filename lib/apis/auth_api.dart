@@ -13,6 +13,12 @@ final authAPIProvider = Provider((ref) {
   return AuthAPI(account: account);
 });
 
+final currentUserProvider = Provider((ref) async {
+  final authAPI = ref.watch(authAPIProvider);
+  final currAcc = await authAPI.currentUserAccount();
+  return currAcc;
+});
+
 abstract class IAuthAPI {
   FutureEither<model.Session> login({
     required String email,

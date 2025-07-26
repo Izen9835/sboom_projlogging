@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sboom_projlogging/core/utils.dart';
 import 'package:sboom_projlogging/features/project_view/widgets/EditorPopup.dart';
+import 'package:sboom_projlogging/features/project_view/widgets/changelogs_list.dart';
 import 'package:sboom_projlogging/model/project_model.dart';
 
 class RepoDetailView extends ConsumerWidget {
@@ -62,6 +63,7 @@ class RepoDetailView extends ConsumerWidget {
                 label: const Text('Open Editor Popup'),
               ),
             ),
+            ChangelogsList(proj: repo),
           ],
         ),
       ),

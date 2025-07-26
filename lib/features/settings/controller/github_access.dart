@@ -48,7 +48,7 @@ class GithubAccess extends StateNotifier<bool> {
   }
 
   void trxToDB(List<Project>? projectsList, BuildContext context) async {
-    final res = await _dbAPI.createList(projectsList);
+    final res = await _dbAPI.createBatchProject(projectsList);
     res.fold(
       (l) => showSnackBar(context, l.message),
       (r) => showSnackBar(context, "success trx to db"),
