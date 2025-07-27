@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:sboom_projlogging/apis/storage_api.dart';
 
 Future<void> showEditorPopup(
   BuildContext context, {
@@ -17,7 +20,7 @@ Future<void> showEditorPopup(
   );
 }
 
-class EditorPopup extends StatefulWidget {
+class EditorPopup extends ConsumerStatefulWidget {
   final QuillController? controller;
   final void Function(QuillController)? onSaved;
 
@@ -25,10 +28,10 @@ class EditorPopup extends StatefulWidget {
     : super(key: key);
 
   @override
-  State<EditorPopup> createState() => _EditorPopupState();
+  ConsumerState<EditorPopup> createState() => _EditorPopupState();
 }
 
-class _EditorPopupState extends State<EditorPopup> {
+class _EditorPopupState extends ConsumerState<EditorPopup> {
   late QuillController _controller;
 
   @override
@@ -39,6 +42,20 @@ class _EditorPopupState extends State<EditorPopup> {
 
   @override
   Widget build(BuildContext context) {
+    Future<String?> onRequestPickImage(context) async {
+      print("bruh");
+      final pickedFile = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+      );
+      if (pickedFile == null) return ("");
+
+      final storageAPI = ref.read(StorageAPIProvider);
+      print(pickedFile.path);
+      final url = await storageAPI.uploadMedia(pickedFile);
+
+      return url;
+    }
+
     return Center(
       child: Material(
         color: Colors.white,
@@ -54,7 +71,13 @@ class _EditorPopupState extends State<EditorPopup> {
                 controller: _controller,
                 config: QuillSimpleToolbarConfig(
                   multiRowsDisplay: true,
-                  embedButtons: FlutterQuillEmbeds.toolbarButtons(),
+                  embedButtons: FlutterQuillEmbeds.toolbarButtons(
+                    imageButtonOptions: QuillToolbarImageButtonOptions(
+                      imageButtonConfig: QuillToolbarImageConfig(
+                        onRequestPickImage: onRequestPickImage,
+                      ),
+                    ),
+                  ),
                 ),
               ),
 
@@ -65,7 +88,7 @@ class _EditorPopupState extends State<EditorPopup> {
                   child: QuillEditor.basic(
                     controller: _controller,
                     config: QuillEditorConfig(
-                      embedBuilders: FlutterQuillEmbeds.editorBuilders(),
+                      embedBuilders: FlutterQuillEmbeds.editorWebBuilders(),
                     ),
                   ),
                 ),

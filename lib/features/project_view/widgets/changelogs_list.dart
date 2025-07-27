@@ -1,10 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sboom_projlogging/apis/auth_api.dart';
 import 'package:sboom_projlogging/common/common.dart';
 import 'package:sboom_projlogging/core/utils.dart';
 import 'package:sboom_projlogging/features/project_view/controller/changelog_controller.dart';
+import 'package:sboom_projlogging/features/project_view/widgets/EditorPopup.dart';
 import 'package:sboom_projlogging/model/model.dart';
+import 'package:sboom_projlogging/core/core.dart';
 
 class ChangelogsList extends ConsumerWidget {
   final Project proj;
@@ -14,24 +19,33 @@ class ChangelogsList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     void onAddChangelog() async {
       final user = await ref.read(currentUserProvider);
+
       if (user != null) {
-        ref
-            .read(ChangelogControllerProvider.notifier)
-            .createChangelog(
-              proj,
-              "here is your hardcoded title",
-              "random text",
-              user.name,
-              context,
-            );
+        showEditorPopup(
+          context,
+          onSaved: (controller) async {
+            final text = jsonEncode(controller.document.toDelta().toJson());
+            ref
+                .read(ChangelogControllerProvider.notifier)
+                .createChangelog(
+                  proj,
+                  "here is your hardcoded title",
+                  text,
+                  user.name,
+                  context,
+                );
+            print('Edited text from popup: $text');
+            showSnackBar(context, 'Text saved from editor popup!');
+          },
+        );
       } else {
         showSnackBar(context, "no user information found");
       }
     }
 
     return Container(
-      height: 200,
-      width: 200,
+      height: 600,
+      width: 1300,
       child: Column(
         children: [
           ElevatedButton.icon(
@@ -51,7 +65,22 @@ class ChangelogsList extends ConsumerWidget {
 
                           return ListTile(
                             title: Text(clog.title),
-                            subtitle: Text(clog.text ?? 'No description'),
+                            subtitle: SizedBox(
+                              height:
+                                  100, // constrain height to avoid infinite height error
+                              child: QuillEditor(
+                                controller: deltaToController(clog.text),
+                                focusNode: FocusNode(),
+                                scrollController: ScrollController(),
+                                config: QuillEditorConfig(
+                                  // readOnly: true,
+                                  showCursor: false,
+                                  autoFocus: false,
+                                  expands: false,
+                                  padding: EdgeInsets.zero,
+                                ),
+                              ),
+                            ),
                             onTap: () {},
                           );
                         },
