@@ -32,7 +32,7 @@ class GithubAPI implements IGithubAPI {
     final session = await _account.getSession(sessionId: 'current');
     final accessToken = session.providerAccessToken;
 
-    // get any public repos that the are in user's organisations
+    // STEP 1: get public repos in user's organisations
 
     // if (accessToken == null) {
     //   throw Exception('GitHub access token not available.');
@@ -58,9 +58,9 @@ class GithubAPI implements IGithubAPI {
     //   );
     // }
 
-    // get any public repos that the are in user's own repositories
+    // STEP 2: get public repos in user's own repositories
 
-    // Step 1: Get the username of the authenticated user.
+    // Get the username of the authenticated user.
     final userResponse = await http.get(
       Uri.parse('https://api.github.com/user'),
       headers: {
@@ -75,7 +75,7 @@ class GithubAPI implements IGithubAPI {
 
     final username = jsonDecode(userResponse.body)['login'];
 
-    // Step 2: Fetch only that user's own public repos.
+    // Fetch only that user's own public repos.
     final reposResponse = await http.get(
       Uri.parse('https://api.github.com/users/$username/repos?type=public'),
       headers: {

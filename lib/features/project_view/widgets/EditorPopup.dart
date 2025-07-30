@@ -88,7 +88,10 @@ class _EditorPopupState extends ConsumerState<EditorPopup> {
                   child: QuillEditor.basic(
                     controller: _controller,
                     config: QuillEditorConfig(
-                      embedBuilders: FlutterQuillEmbeds.editorWebBuilders(),
+                      embedBuilders: FlutterQuillEmbeds.editorWebBuilders(
+                        imageEmbedConfig: QuillEditorImageEmbedConfig(),
+                        //TODO: make it fetch images from database securely (currently appwrite perms lets anyone on the internet read images)
+                      ),
                     ),
                   ),
                 ),

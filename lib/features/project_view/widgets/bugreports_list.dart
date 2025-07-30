@@ -7,14 +7,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sboom_projlogging/apis/auth_api.dart';
 import 'package:sboom_projlogging/common/common.dart';
 import 'package:sboom_projlogging/core/utils.dart';
+import 'package:sboom_projlogging/features/project_view/controller/bugreports_controller.dart';
 import 'package:sboom_projlogging/features/project_view/controller/changelog_controller.dart';
 import 'package:sboom_projlogging/features/project_view/widgets/EditorPopup.dart';
 import 'package:sboom_projlogging/model/model.dart';
 import 'package:sboom_projlogging/core/core.dart';
 
-class ChangelogsList extends ConsumerWidget {
-  final Project proj;
-  const ChangelogsList({super.key, required this.proj});
+class BugReportsList extends ConsumerWidget {
+  final Project? proj; // made nullable
+  const BugReportsList({super.key, this.proj}); // proj no longer required
 
   QuillController deltaToController(String deltaJson) {
     return QuillController(
@@ -25,23 +26,27 @@ class ChangelogsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    void onAddChangelog() async {
+    void onAddBugReport() async {
       final user = await ref.read(currentUserProvider);
       if (user != null) {
         showEditorPopup(
           context,
           onSaved: (controller) async {
             final text = jsonEncode(controller.document.toDelta().toJson());
-            ref
-                .read(ChangelogControllerProvider.notifier)
-                .createChangelog(
-                  proj,
-                  "here is your hardcoded title",
-                  text,
-                  user.name,
-                  context,
-                );
-            showSnackBar(context, 'Text saved from editor popup!');
+            if (proj != null) {
+              ref
+                  .read(BugReportControllerProvider.notifier)
+                  .createBugReport(
+                    proj!,
+                    "here is your hardcoded title",
+                    text,
+                    user.name,
+                    context,
+                  );
+              showSnackBar(context, 'Text saved from editor popup!');
+            } else {
+              showSnackBar(context, 'Project not specified.');
+            }
           },
         );
       } else {
@@ -55,25 +60,24 @@ class ChangelogsList extends ConsumerWidget {
         children: [
           ElevatedButton.icon(
             icon: const Icon(Icons.add),
-            label: const Text('Add Changelog'),
-            onPressed: onAddChangelog,
+            label: const Text('Add Bug Report'),
+            onPressed: onAddBugReport,
           ),
           const SizedBox(height: 12),
-          // Removed Expanded -> ListView now has shrinkWrap and physics set
           ref
-              .watch(ChangelogListProvider(proj))
+              .watch(BugReportListProvider(proj))
               .when(
-                data: (clogs) {
-                  if (clogs.isEmpty) {
-                    return const Center(child: Text('No changelogs yet.'));
+                data: (bugreps) {
+                  if (bugreps.isEmpty) {
+                    return const Center(child: Text('No bug reports yet.'));
                   }
                   return ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: clogs.length,
+                    itemCount: bugreps.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
-                      final clog = clogs[index];
+                      final bugrep = bugreps[index];
                       return Card(
                         elevation: 2,
                         shape: RoundedRectangleBorder(
@@ -89,7 +93,7 @@ class ChangelogsList extends ConsumerWidget {
                             children: [
                               // Title
                               Text(
-                                clog.title,
+                                bugrep.title,
                                 style: Theme.of(context).textTheme.titleMedium
                                     ?.copyWith(fontWeight: FontWeight.bold),
                               ),
@@ -98,7 +102,7 @@ class ChangelogsList extends ConsumerWidget {
                               SizedBox(
                                 height: 100,
                                 child: QuillEditor(
-                                  controller: deltaToController(clog.text),
+                                  controller: deltaToController(bugrep.text),
                                   focusNode: FocusNode(),
                                   scrollController: ScrollController(),
                                   config: QuillEditorConfig(
@@ -122,7 +126,7 @@ class ChangelogsList extends ConsumerWidget {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    clog.createdBy,
+                                    bugrep.createdBy,
                                     style: const TextStyle(
                                       fontSize: 14,
                                       color: Colors.black87,
@@ -136,7 +140,7 @@ class ChangelogsList extends ConsumerWidget {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    _formatDate(clog.createdAt),
+                                    _formatDate(bugrep.createdAt),
                                     style: const TextStyle(
                                       fontSize: 14,
                                       color: Colors.black54,
@@ -144,7 +148,7 @@ class ChangelogsList extends ConsumerWidget {
                                   ),
                                   const Spacer(),
                                   Text(
-                                    clog.projectID,
+                                    bugrep.projectID,
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey,

@@ -36,8 +36,6 @@ class ChangelogController extends StateNotifier<bool> {
     String user,
     BuildContext context,
   ) async {
-    //TODO: convert 'text' from quill delta into a string...
-
     final data =
         Changelog(
           title: title,

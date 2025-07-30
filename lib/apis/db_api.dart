@@ -173,7 +173,7 @@ class DbAPI implements IdbAPI {
 
   @override
   Future<List<T>> getProjectDetails<T>(
-    String projectID,
+    String? projectID, // make nullable if needed
     DataType dataType,
   ) async {
     final collectionId = dataType.collectionId;
@@ -181,7 +181,10 @@ class DbAPI implements IdbAPI {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: collectionId,
-      queries: [Query.equal('projectID', projectID)],
+      queries:
+          projectID == null || projectID.isEmpty
+              ? []
+              : [Query.equal('projectID', projectID)],
     );
 
     return documents.documents.map((doc) => fromDocument<T>(doc)).toList();

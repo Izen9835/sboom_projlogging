@@ -43,7 +43,7 @@ class HomeView extends ConsumerWidget {
                       onTap: () {
                         Navigator.of(
                           context,
-                        ).push(RepoDetailView.route(repo: repo));
+                        ).push(ProjectViewPage.route(proj: repo));
                       },
                     );
                   },
