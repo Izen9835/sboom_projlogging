@@ -15,6 +15,7 @@ class MainApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       localizationsDelegates: const [FlutterQuillLocalizations.delegate],
       initialRoute: '/',
       routes: {

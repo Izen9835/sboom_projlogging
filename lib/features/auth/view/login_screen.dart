@@ -13,6 +13,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  void onLogin() {
+    ref
+        .read(authControllerProvider.notifier)
+        .login(
+          context: context,
+          email: emailController.text,
+          pass: passwordController.text,
+        );
+  }
+
   void OnGithubLogin() {
     ref.read(authControllerProvider.notifier).githubLogin(context: context);
   }
@@ -47,9 +57,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                         SizedBox(height: 24),
                         ElevatedButton(
-                          onPressed: () {
-                            // Handle email/password authentication here
-                          },
+                          onPressed: onLogin,
                           child: Text('Login'),
                         ),
                         SizedBox(height: 24),

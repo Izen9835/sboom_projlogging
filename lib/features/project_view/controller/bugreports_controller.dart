@@ -53,10 +53,10 @@ class BugReportController extends StateNotifier<bool> {
         ).toMap();
 
     final res = await _dbAPI.createProjectDetail(
-      proj.projectID!,
-      data,
-      DataType.BugReport,
-      false,
+      projectID: proj.projectID!,
+      data: data,
+      dataType: DataType.BugReport,
+      stayUnique: false,
     );
 
     res.fold(

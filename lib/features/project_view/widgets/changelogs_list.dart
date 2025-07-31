@@ -30,18 +30,11 @@ class ChangelogsList extends ConsumerWidget {
       if (user != null) {
         showEditorPopup(
           context,
-          onSaved: (controller) async {
+          onSaved: (controller, titleText) async {
             final text = jsonEncode(controller.document.toDelta().toJson());
             ref
                 .read(ChangelogControllerProvider.notifier)
-                .createChangelog(
-                  proj,
-                  "here is your hardcoded title",
-                  text,
-                  user.name,
-                  context,
-                );
-            showSnackBar(context, 'Text saved from editor popup!');
+                .createChangelog(proj, titleText, text, user.name, context);
           },
         );
       } else {

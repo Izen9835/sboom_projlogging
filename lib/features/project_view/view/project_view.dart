@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sboom_projlogging/features/project_view/widgets/bugreports_list.dart';
 import 'package:sboom_projlogging/features/project_view/widgets/changelogs_list.dart';
+import 'package:sboom_projlogging/features/project_view/widgets/summary.dart';
 import 'package:sboom_projlogging/model/changelog_model.dart';
 import 'package:sboom_projlogging/model/project_model.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -97,7 +98,7 @@ class ProjectViewPage extends ConsumerWidget {
               ],
 
               // Summary Section (using the new widget)
-              // SummaryWidget(proj: proj),
+              SummaryInfo(proj: proj),
               const SizedBox(height: 24),
 
               Row(

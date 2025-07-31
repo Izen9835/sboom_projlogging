@@ -12,15 +12,21 @@ final DbAPIProvider = Provider((ref) {
 });
 
 abstract class IdbAPI {
+  // create
   FutureEitherVoid createBatchProject(List<Project>? list);
-  FutureEitherVoid createProjectDetail(
-    String projectID,
-    Map<String, dynamic> data,
-    DataType dataType,
-    bool stayUnique,
-  );
+  FutureEitherVoid createProjectDetail({
+    required String projectID,
+    required Map<String, dynamic> data,
+    required DataType dataType,
+    required bool stayUnique,
+  });
+
+  // read
   Future<List<Project>> getListProjects();
   Future<List<T>> getProjectDetails<T>(String projectID, DataType dataType);
+
+  // update
+  // FutureEitherVoid updateProjectDetail
 }
 
 class DbAPI implements IdbAPI {
@@ -118,12 +124,12 @@ class DbAPI implements IdbAPI {
   }
 
   @override
-  FutureEitherVoid createProjectDetail(
-    String projectID,
-    Map<String, dynamic> data,
-    DataType dataType,
-    bool stayUnique,
-  ) async {
+  FutureEitherVoid createProjectDetail({
+    required String projectID,
+    required Map<String, dynamic> data,
+    required DataType dataType,
+    required bool stayUnique,
+  }) async {
     final collectionId = dataType.collectionId;
 
     try {

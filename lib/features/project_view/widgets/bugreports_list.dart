@@ -31,22 +31,19 @@ class BugReportsList extends ConsumerWidget {
       if (user != null) {
         showEditorPopup(
           context,
-          onSaved: (controller) async {
+          onSaved: (controller, titleText) async {
             final text = jsonEncode(controller.document.toDelta().toJson());
-            if (proj != null) {
-              ref
-                  .read(BugReportControllerProvider.notifier)
-                  .createBugReport(
-                    proj!,
-                    "here is your hardcoded title",
-                    text,
-                    user.name,
-                    context,
-                  );
-              showSnackBar(context, 'Text saved from editor popup!');
-            } else {
-              showSnackBar(context, 'Project not specified.');
+            if (proj == null) {
+              showSnackBar(context, 'no project ID specified');
+              return;
+            } else if (titleText == null) {
+              showSnackBar(context, "title cannot be empty!");
+              return;
             }
+
+            ref
+                .read(BugReportControllerProvider.notifier)
+                .createBugReport(proj!, titleText, text, user.name, context);
           },
         );
       } else {

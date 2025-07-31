@@ -46,10 +46,10 @@ class ChangelogController extends StateNotifier<bool> {
         ).toMap();
 
     final res = await _dbAPI.createProjectDetail(
-      proj.projectID!,
-      data,
-      DataType.Changelog,
-      false,
+      projectID: proj.projectID!,
+      data: data,
+      dataType: DataType.Changelog,
+      stayUnique: false,
     );
 
     res.fold(
