@@ -26,7 +26,10 @@ abstract class IdbAPI {
   Future<List<T>> getProjectDetails<T>(String projectID, DataType dataType);
 
   // update
-  // FutureEitherVoid updateProjectDetail
+  FutureEitherVoid updateProjectDetail<T>({
+    required T data,
+    required DataType dataType,
+  });
 }
 
 class DbAPI implements IdbAPI {
@@ -153,7 +156,9 @@ class DbAPI implements IdbAPI {
       final document = await _db.createDocument(
         databaseId: AppwriteConstants.databaseId,
         collectionId: collectionId,
-        documentId: ID.unique(), // unique document ID as required
+        documentId:
+            data['id']
+                as String, //TODO: change function to accept the model as the data (rather than a json)
         data: data,
       );
 
@@ -194,5 +199,31 @@ class DbAPI implements IdbAPI {
     );
 
     return documents.documents.map((doc) => fromDocument<T>(doc)).toList();
+  }
+
+  @override
+  FutureEitherVoid updateProjectDetail<T>({
+    required T data,
+    required DataType dataType,
+  }) async {
+    try {
+      final collectionId = dataType.collectionId;
+
+      final String documentId = (data as dynamic).id;
+      final Map<String, dynamic> updateData = (data as dynamic).toMap();
+
+      await _db.updateDocument(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: collectionId,
+        documentId: documentId,
+        data: updateData,
+      );
+
+      return right(null);
+    } on AppwriteException catch (e, st) {
+      return left(Failure(e.message ?? 'Some unexpected error occurred', st));
+    } catch (e, st) {
+      return left(Failure(e.toString(), st));
+    }
   }
 }

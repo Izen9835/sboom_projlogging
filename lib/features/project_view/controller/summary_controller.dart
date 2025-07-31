@@ -1,3 +1,4 @@
+import 'package:appwrite/appwrite.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sboom_projlogging/apis/db_api.dart';
@@ -23,12 +24,13 @@ class SummaryController extends StateNotifier<bool> {
         proj.projectID!,
         DataType.Summary,
       );
-      if (list == null || list.isEmpty) return Summary(text: "", projectID: "");
+      if (list == null || list.isEmpty)
+        return Summary(text: "", projectID: "", id: "");
       return list[0];
     } catch (e, st) {
       print(e);
       print(st);
-      return Summary(text: "summary retrieval error", projectID: "");
+      return Summary(text: "summary retrieval error", projectID: "", id: "");
     }
   }
 
@@ -38,9 +40,12 @@ class SummaryController extends StateNotifier<bool> {
     String user,
     BuildContext context,
   ) async {
-    print(text);
-    print(proj.projectID);
-    final data = Summary(text: text, projectID: proj.projectID!).toMap();
+    final data =
+        Summary(
+          text: text,
+          projectID: proj.projectID!,
+          id: ID.unique(),
+        ).toMap();
 
     final res = await _dbAPI.createProjectDetail(
       projectID: proj.projectID!,
@@ -52,6 +57,23 @@ class SummaryController extends StateNotifier<bool> {
     res.fold(
       (l) => showSnackBar(context, l.message),
       (r) => showSnackBar(context, "summary created!"),
+    );
+  }
+
+  void updateSummary(
+    Summary oldSummary,
+    String text,
+    BuildContext context,
+  ) async {
+    final data = oldSummary.copyWith(text: text);
+
+    final res = await _dbAPI.updateProjectDetail(
+      data: data,
+      dataType: DataType.Summary,
+    );
+    res.fold(
+      (l) => showSnackBar(context, l.message),
+      (r) => showSnackBar(context, "summary updated!"),
     );
   }
 }

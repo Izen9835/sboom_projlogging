@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sboom_projlogging/apis/auth_api.dart';
 import 'package:sboom_projlogging/common/common.dart';
@@ -15,7 +16,7 @@ class SummaryInfo extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    void onAddSummary() async {
+    void onCreateSummary() async {
       final user = await ref.read(currentUserProvider);
       if (user != null) {
         showEditorPopup(
@@ -39,6 +40,43 @@ class SummaryInfo extends ConsumerWidget {
       }
     }
 
+    void onUpdateSummary() async {
+      final user = await ref.read(currentUserProvider);
+      if (user != null) {
+        final summary = ref
+            .read(SummaryInfoProvider(proj))
+            .maybeWhen(data: (value) => value, orElse: () => null);
+        if (summary == null) {
+          showSnackBar(context, "Summary not found");
+          return;
+        }
+
+        final doc =
+            summary.text.isEmpty ? quill.Document() : quill.Document()
+              ..insert(0, summary.text);
+
+        final controller = quill.QuillController(
+          document: doc,
+          selection: const TextSelection.collapsed(offset: 0),
+        );
+
+        showEditorPopup(
+          context,
+          controller: controller,
+          hasTitle: false,
+          onSaved: (updatedController, titleText) {
+            ref
+                .read(SummaryControllerProvider.notifier)
+                .updateSummary(
+                  summary,
+                  updatedController.document.toPlainText(),
+                  context,
+                );
+          },
+        );
+      }
+    }
+
     return ref
         .watch(SummaryInfoProvider(proj))
         .when(
@@ -48,7 +86,7 @@ class SummaryInfo extends ConsumerWidget {
               return TextButton.icon(
                 icon: Icon(Icons.add),
                 label: Text('Add Summary'),
-                onPressed: onAddSummary,
+                onPressed: onCreateSummary,
               );
             }
             // Show title, summary, and edit icon if there is summary text
@@ -65,9 +103,7 @@ class SummaryInfo extends ConsumerWidget {
                     ),
                     IconButton(
                       icon: Icon(Icons.edit),
-                      onPressed: () {
-                        // Your edit handler here
-                      },
+                      onPressed: onUpdateSummary,
                       tooltip: 'Edit Summary',
                     ),
                   ],
